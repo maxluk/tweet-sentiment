@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <!-- Google Maps -->
+    <link href="https://google-developers.appspot.com/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=visualization"></script>
+
+    <!-- Spatial Dashboard JavaScript -->
+    <script src="~/Scripts/twitterStream.js" type="text/javascript"></script>
+
+</head>
+<body onload ="initialize()">
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+
+            <div class="navbar-collapse collapse">
+                <div class="row">
+                    <ul class="nav navbar-nav col-lg-5">
+                        <li class="col-lg-12">
+                            <div class="navbar-form">
+                                <input id="searchbox" type="search" class="form-control">
+                                <button type="button" class="btn btn-primary" onclick="onsearch();">Go</button>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="nav navbar-nav col-lg-4">
+                        <li>
+                            <div class="navbar-form">
+                                <div class="btn-group" data-toggle="buttons-radio">
+                                    <button type="button" id="positiveBtn" class="btn btn-primary" onclick="onPositiveBtn();">Positive</button>
+                                    <button type="button" id="neutralBtn" class="btn btn-primary" onclick="onNeutralBtn();">Neutral</button>
+                                    <button type="button" id="negativeBtn" class="btn btn-primary" onclick="onNegativeBtn();">Negative</button>
+                                </div>
+                            </div>
+                        </li>
+                        @*<li class="divider-vertical"></li>
+                <li>@Html.ActionLink("Home", "Index", "Home")</li>
+            <li>@Html.ActionLink("About", "About", "Home")</li>
+            <li>@Html.ActionLink("Contact", "Contact", "Home")</li>*@
+                        <li><span id="statustext" class="navbar-text"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*"container body-content"*@
+    <div class="map_container">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>

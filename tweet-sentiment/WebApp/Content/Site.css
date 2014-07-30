@@ -1,0 +1,36 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+/* make container, and thus map, 100% width */
+.map_container {
+	width: 100%;
+	height: 100%;
+}
+
+#map_canvas{
+  height:100%;
+}
+
+#tweets{
+  position: absolute;
+  top: 60px;
+  left: 75px;
+  z-index:1000;
+  font-size: 30px;
+}
+
