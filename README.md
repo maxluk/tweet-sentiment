@@ -10,3 +10,5 @@ You can get api keys from twitter here: https://apps.twitter.com/
 * Another piece of credentials is for hbase cluster. Once you created your HBase cluster create credentials file in this folder: https://github.com/maxluk/tweet-sentiment/tree/master/tweet-sentiment/SimpleStreamingService, the file format has three lines: uri of the cluster, user name, password.
 
 * You will also need to put hbase credentials in this file for web application: https://github.com/maxluk/tweet-sentiment/blob/master/tweet-sentiment/WebApp/Web.config.
+
+* Then build solution in VS2013.
