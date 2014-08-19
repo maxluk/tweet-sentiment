@@ -103,22 +103,32 @@ namespace SimpleStreamingService
 
             foreach (var word in all_words)
             {
-                var time_index = (ulong.MaxValue - (ulong)tweet.CreatedAt.ToBinary()).ToString().PadLeft(20) + tweet.IdStr;
+                var time_index = (ulong.MaxValue - 
+                    (ulong)tweet.CreatedAt.ToBinary()).ToString().PadLeft(20) + tweet.IdStr;
                 var key = word + "_" + time_index;
                 var row = new CellSet.Row { key = Encoding.UTF8.GetBytes(key) };
 
-                var value = new Cell { column = Encoding.UTF8.GetBytes("d:id_str"), data = Encoding.UTF8.GetBytes(tweet.IdStr) };
+                var value = new Cell { 
+                    column = Encoding.UTF8.GetBytes("d:id_str"),
+                    data = Encoding.UTF8.GetBytes(tweet.IdStr) };
                 row.values.Add(value);
-                value = new Cell { column = Encoding.UTF8.GetBytes("d:lang"), data = Encoding.UTF8.GetBytes(tweet.Language.ToString()) };
+                value = new Cell { 
+                    column = Encoding.UTF8.GetBytes("d:lang"),
+                    data = Encoding.UTF8.GetBytes(tweet.Language.ToString()) };
                 row.values.Add(value);
                 if (tweet.Coordinates != null)
                 {
-                    var str = tweet.Coordinates.Longitude.ToString() + "," + tweet.Coordinates.Latitude.ToString();
-                    value = new Cell { column = Encoding.UTF8.GetBytes("d:coor"), data = Encoding.UTF8.GetBytes(str) };
+                    var str = tweet.Coordinates.Longitude.ToString() + "," + 
+                              tweet.Coordinates.Latitude.ToString();
+                    value = new Cell { 
+                        column = Encoding.UTF8.GetBytes("d:coor"),
+                        data = Encoding.UTF8.GetBytes(str) };
                     row.values.Add(value);
                 }
 
-                value = new Cell { column = Encoding.UTF8.GetBytes("d:sentiment"), data = Encoding.UTF8.GetBytes(sentimentScore.ToString()) };
+                value = new Cell { 
+                    column = Encoding.UTF8.GetBytes("d:sentiment"),
+                    data = Encoding.UTF8.GetBytes(sentimentScore.ToString()) };
                 row.values.Add(value);
 
                 set.rows.Add(row);

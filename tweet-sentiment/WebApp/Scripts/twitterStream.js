@@ -84,14 +84,7 @@ function initialize() {
 
     heatmapNeg.set('gradient', gradientNeg);
 
-    //Add tweet to the heat map array.
-    var tweetLocation = new google.maps.LatLng(40, -120);
-    liveTweets.push(tweetLocation);
-
-    //Add tweet to the heat map array.
-    var tweetLocationNeg = new google.maps.LatLng(40, -120);
-    liveTweetsNeg.push(tweetLocationNeg);
-
+    $("#searchbox").val("xbox");
     $("#neutralBtn").button("toggle");
 
     //Flash a dot onto the map quickly
@@ -201,7 +194,7 @@ function onPositiveBtn() {
     heatmapNeg.setMap(null);
     heatmap.setMap(null);
 
-    $('#statustext').text('Tweets: ' + liveTweetsPos.length);
+    $('#statustext').text('Tweets: ' + liveTweetsPos.length + "   " + getPosNegRatio());
 }
 
 function onNeutralBtn() {
@@ -216,7 +209,7 @@ function onNeutralBtn() {
     heatmapNeg.setMap(null);
     heatmapPos.setMap(null);
 
-    $('#statustext').text('Tweets: ' + liveTweets.length);
+    $('#statustext').text('Tweets: ' + liveTweets.length + "   " + getPosNegRatio());
 }
 
 function onNegativeBtn() {
@@ -231,5 +224,17 @@ function onNegativeBtn() {
     heatmap.setMap(null);
     heatmapPos.setMap(null);
 
-    $('#statustext').text('Tweets: ' + liveTweetsNeg.length);
+    $('#statustext').text('Tweets: ' + liveTweetsNeg.length + "\t" + getPosNegRatio());
+}
+
+function getPosNegRatio()
+{
+    if (liveTweetsNeg.length == 0) {
+        return "";
+    }
+    else {
+        var ratio = liveTweetsPos.length/liveTweetsNeg.length;
+        var str = parseFloat(Math.round(ratio * 10) / 10).toFixed(1);
+        return "Positive/Negative Ratio: " + str;
+    }
 }
