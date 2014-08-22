@@ -1,137 +1,100 @@
-﻿var liveTweetsPos = new google.maps.MVCArray();
-var liveTweets = new google.maps.MVCArray();
-var liveTweetsNeg = new google.maps.MVCArray();
+﻿var liveTweetsPos = [];
+var liveTweets = [];
+var liveTweetsNeg = [];
 var map;
 var heatmap;
 var heatmapNeg;
 var heatmapPos;
 
 function initialize() {
-    //Setup Google Map
-    var myLatlng = new google.maps.LatLng(17.7850, -12.4183);
-    var light_grey_style = [{ "featureType": "landscape", "stylers": [{ "saturation": -100 }, { "lightness": 65 }, { "visibility": "on" }] }, { "featureType": "poi", "stylers": [{ "saturation": -100 }, { "lightness": 51 }, { "visibility": "simplified" }] }, { "featureType": "road.highway", "stylers": [{ "saturation": -100 }, { "visibility": "simplified" }] }, { "featureType": "road.arterial", "stylers": [{ "saturation": -100 }, { "lightness": 30 }, { "visibility": "on" }] }, { "featureType": "road.local", "stylers": [{ "saturation": -100 }, { "lightness": 40 }, { "visibility": "on" }] }, { "featureType": "transit", "stylers": [{ "saturation": -100 }, { "visibility": "simplified" }] }, { "featureType": "administrative.province", "stylers": [{ "visibility": "off" }] }, { "featureType": "water", "elementType": "labels", "stylers": [{ "visibility": "on" }, { "lightness": -25 }, { "saturation": -100 }] }, { "featureType": "water", "elementType": "geometry", "stylers": [{ "hue": "#ffff00" }, { "lightness": -25 }, { "saturation": -97 }] }];
-    var myOptions = {
-        zoom: 3,
-        center: myLatlng,
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        mapTypeControl: true,
-        mapTypeControlOptions: {
-            style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-            position: google.maps.ControlPosition.LEFT_BOTTOM
-        },
-        styles: light_grey_style
+    // Initialize the map
+    var options = { 
+        credentials: "AvFJTZPZv8l3gF8VC3Y7BPBd0r7LKo8dqKG02EAlqg9WAi0M7la6zSIT-HwkMQbx",
+        center: new Microsoft.Maps.Location(23.0, 8.0),
+        mapTypeId: Microsoft.Maps.MapTypeId.ordnanceSurvey,
+        labelOverlay: Microsoft.Maps.LabelOverlay.hidden,
+        zoom: 2.5
     };
-    map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+    var map = new Microsoft.Maps.Map(document.getElementById('map_canvas'), options);
 
-    //Setup heat map and link to Twitter array we will append data to
-    heatmap = new google.maps.visualization.HeatmapLayer({
-        data: liveTweets,
-        radius: 25
+    // Heatmap options for positive, neutral and negative layers
+
+    var heatmapOptions = {
+        // Opacity at the centre of each heat point
+        intensity: 0.5,
+
+        // Affected radius of each heat point
+        radius: 15,
+
+        // Whether the radius is an absolute pixel value or meters
+        unit: 'pixels'
+    };
+
+    var heatmapPosOptions = {
+        // Opacity at the centre of each heat point
+        intensity: 0.5,
+
+        // Affected radius of each heat point
+        radius: 15,
+
+        // Whether the radius is an absolute pixel value or meters
+        unit: 'pixels',
+
+        colourgradient: {
+            0.0: 'rgba(0, 255, 255, 0)',
+            0.1: 'rgba(0, 255, 255, 1)',
+            0.2: 'rgba(0, 255, 191, 1)',
+            0.3: 'rgba(0, 255, 127, 1)',
+            0.4: 'rgba(0, 255, 63, 1)',
+            0.5: 'rgba(0, 127, 0, 1)',
+            0.7: 'rgba(0, 159, 0, 1)',
+            0.8: 'rgba(0, 191, 0, 1)',
+            0.9: 'rgba(0, 223, 0, 1)',
+            1.0: 'rgba(0, 255, 0, 1)'
+        }
+    };
+
+    var heatmapNegOptions = {
+        // Opacity at the centre of each heat point
+        intensity: 0.5,
+
+        // Affected radius of each heat point
+        radius: 15,
+
+        // Whether the radius is an absolute pixel value or meters
+        unit: 'pixels',
+
+        colourgradient: {
+            0.0: 'rgba(0, 255, 255, 0)',
+            0.1: 'rgba(0, 255, 255, 1)',
+            0.2: 'rgba(0, 191, 255, 1)',
+            0.3: 'rgba(0, 127, 255, 1)',
+            0.4: 'rgba(0, 63, 255, 1)',
+            0.5: 'rgba(0, 0, 127, 1)',
+            0.7: 'rgba(0, 0, 159, 1)',
+            0.8: 'rgba(0, 0, 191, 1)',
+            0.9: 'rgba(0, 0, 223, 1)',
+            1.0: 'rgba(0, 0, 255, 1)'
+        }
+    };
+
+    // Register and load the Client Side HeatMap Module
+    Microsoft.Maps.registerModule("HeatMapModule", "scripts/heatmap.js");
+    Microsoft.Maps.loadModule("HeatMapModule", {
+        callback: function () {
+            // Create heatmap layers for positive, neutral and negative tweets
+            heatmapPos = new HeatMapLayer(map, liveTweetsPos, heatmapPosOptions);
+            heatmap = new HeatMapLayer(map, liveTweets, heatmapOptions);
+            heatmapNeg = new HeatMapLayer(map, liveTweetsNeg, heatmapNegOptions);
+        }
     });
-
-    heatmapNeg = new google.maps.visualization.HeatmapLayer({
-        data: liveTweetsNeg,
-        radius: 25
-    });
-
-    heatmapPos = new google.maps.visualization.HeatmapLayer({
-        data: liveTweetsPos,
-        radius: 25
-    });
-
-    heatmap.setMap(map);
-
-    //var gradientNeg = [
-    //  'rgba(0, 255, 255, 0)',
-    //  'rgba(0, 255, 255, 1)',
-    //  'rgba(0, 191, 255, 1)',
-    //  'rgba(0, 127, 255, 1)',
-    //  'rgba(0, 63, 255, 1)',
-    //  //'rgba(0, 0, 255, 1)',
-    //  //'rgba(0, 0, 223, 1)',
-    //  'rgba(0, 0, 127, 1)',
-    //  'rgba(0, 0, 159, 1)',
-    //  'rgba(0, 0, 191, 1)'
-    //]
-    var gradientNeg = [
-        'rgba(0, 255, 255, 0)',
-        'rgba(0, 255, 255, 1)',
-        'rgba(0, 191, 255, 1)',
-        'rgba(0, 127, 255, 1)',
-        'rgba(0, 63, 255, 1)',
-        'rgba(0, 0, 255, 1)',
-        'rgba(0, 0, 223, 1)',
-        'rgba(0, 0, 191, 1)',
-        'rgba(0, 0, 159, 1)',
-        'rgba(0, 0, 127, 1)',
-        'rgba(63, 0, 91, 1)',
-        'rgba(127, 0, 63, 1)',
-        'rgba(191, 0, 31, 1)',
-        'rgba(255, 0, 0, 1)'
-    ]
-    var gradientPos = [
-      'rgba(0, 255, 255, 0)',
-      'rgba(0, 255, 255, 1)',
-      'rgba(0, 255, 191, 1)',
-      'rgba(0, 255, 127, 1)',
-      'rgba(0, 255, 63, 1)',
-      //'rgba(0, 0, 255, 1)',
-      //'rgba(0, 0, 223, 1)',
-      'rgba(0, 127, 0, 1)',
-      'rgba(0, 159, 0, 1)',
-      'rgba(0, 191, 0, 1)'
-    ]
-
-    heatmapNeg.set('gradient', gradientNeg);
 
     $("#searchbox").val("xbox");
+    $("#searchBtn").click(onsearch);
+    $("#positiveBtn").click(onPositiveBtn);
+    $("#negativeBtn").click(onNegativeBtn);
+    $("#neutralBtn").click(onNeutralBtn);
     $("#neutralBtn").button("toggle");
-
-    //Flash a dot onto the map quickly
-    //var image = "Content/small-dot-icon.png";
-    //var marker = new google.maps.Marker({
-    //    position: tweetLocation,
-    //    map: map,
-    //    icon: image
-    //});
-    //setTimeout(function () {
-    //    marker.setMap(null);
-    //}, 600);
-
-    //if (io !== undefined) {
-    //    // Storage for WebSocket connections
-    //    var socket = io.connect('/');
-
-    //    // This listens on the "twitter-steam" channel and data is 
-    //    // received everytime a new tweet is receieved.
-    //    socket.on('twitter-stream', function (data) {
-
-    //        //Add tweet to the heat map array.
-    //        var tweetLocation = new google.maps.LatLng(data.lng, data.lat);
-    //        liveTweets.push(tweetLocation);
-
-    //        //Flash a dot onto the map quickly
-    //        var image = "css/small-dot-icon.png";
-    //        var marker = new google.maps.Marker({
-    //            position: tweetLocation,
-    //            map: map,
-    //            icon: image
-    //        });
-    //        setTimeout(function () {
-    //            marker.setMap(null);
-    //        }, 600);
-
-    //    });
-
-    //    // Listens for a success response from the server to 
-    //    // say the connection was successful.
-    //    socket.on("connected", function (r) {
-
-    //        //Now that we are connected to the server let's tell 
-    //        //the server we are ready to start receiving tweets.
-    //        socket.emit("start tweets");
-    //    });
-    //}
 }
 
 function onsearch() {
@@ -139,9 +102,9 @@ function onsearch() {
     var query = $('#searchbox').val();
     $.getJSON(uri + query)
         .done(function (data) {
-            liveTweetsPos.clear();
-            liveTweets.clear();
-            liveTweetsNeg.clear();
+            liveTweetsPos = [];
+            liveTweets = [];
+            liveTweetsNeg = [];
 
             // On success, 'data' contains a list of tweets.
             $.each(data, function (key, item) {
@@ -159,8 +122,8 @@ function onsearch() {
 }
 
 function addTweet(item) {
-    //Add tweet to the heat map array.
-    var tweetLocation = new google.maps.LatLng(item.Latitude, item.Longtitude);
+    //Add tweet to the heat map arrays.
+    var tweetLocation = new Microsoft.Maps.Location(item.Latitude, item.Longtitude);
     if (item.Sentiment > 0) {
         liveTweetsPos.push(tweetLocation);
     } else if (item.Sentiment < 0) {
@@ -168,18 +131,6 @@ function addTweet(item) {
     } else {
         liveTweets.push(tweetLocation);
     }
-        //Flash a dot onto the map quickly
-        //var image = "Content/small-dot-icon.png";
-        //if (item.Sentiment < 0) {
-        //    var marker = new google.maps.Marker({
-        //        position: tweetLocation,
-        //        map: map,
-        //        icon: image
-        //    });
-        //}
-        //setTimeout(function () {
-        //    marker.setMap(null);
-        //}, 600);
 }
 
 function onPositiveBtn() {
@@ -190,9 +141,10 @@ function onPositiveBtn() {
         $("#negativeBtn").button("toggle");
     }
 
-    heatmapPos.setMap(map);
-    heatmapNeg.setMap(null);
-    heatmap.setMap(null);
+    heatmapPos.SetPoints(liveTweetsPos);
+    heatmapPos.Show();
+    heatmapNeg.Hide();
+    heatmap.Hide();
 
     $('#statustext').text('Tweets: ' + liveTweetsPos.length + "   " + getPosNegRatio());
 }
@@ -205,9 +157,10 @@ function onNeutralBtn() {
         $("#negativeBtn").button("toggle");
     }
 
-    heatmap.setMap(map);
-    heatmapNeg.setMap(null);
-    heatmapPos.setMap(null);
+    heatmap.SetPoints(liveTweets);
+    heatmap.Show();
+    heatmapNeg.Hide();
+    heatmapPos.Hide();
 
     $('#statustext').text('Tweets: ' + liveTweets.length + "   " + getPosNegRatio());
 }
@@ -220,9 +173,10 @@ function onNegativeBtn() {
         $("#neutralBtn").button("toggle");
     }
 
-    heatmapNeg.setMap(map);
-    heatmap.setMap(null);
-    heatmapPos.setMap(null);
+    heatmapNeg.SetPoints(liveTweetsNeg);
+    heatmapNeg.Show();
+    heatmap.Hide();;
+    heatmapPos.Hide();;
 
     $('#statustext').text('Tweets: ' + liveTweetsNeg.length + "\t" + getPosNegRatio());
 }
