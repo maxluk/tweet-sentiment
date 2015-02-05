@@ -133,6 +133,10 @@ function addTweet(item) {
     }
 }
 
+function formatStatus(tweets, ratio) {
+    return 'Tweets: ' + tweets + ", " + ratio;
+}
+
 function onPositiveBtn() {
     if ($("#neutralBtn").hasClass('active')) {
         $("#neutralBtn").button("toggle");
@@ -146,7 +150,7 @@ function onPositiveBtn() {
     heatmapNeg.Hide();
     heatmap.Hide();
 
-    $('#statustext').text('Tweets: ' + liveTweetsPos.length + "   " + getPosNegRatio());
+    $('#statustext').text(formatStatus(liveTweetsPos.length, getPosNegRatio()));
 }
 
 function onNeutralBtn() {
@@ -162,7 +166,7 @@ function onNeutralBtn() {
     heatmapNeg.Hide();
     heatmapPos.Hide();
 
-    $('#statustext').text('Tweets: ' + liveTweets.length + "   " + getPosNegRatio());
+    $('#statustext').text(formatStatus(liveTweets.length, getPosNegRatio()));
 }
 
 function onNegativeBtn() {
@@ -178,7 +182,7 @@ function onNegativeBtn() {
     heatmap.Hide();;
     heatmapPos.Hide();;
 
-    $('#statustext').text('Tweets: ' + liveTweetsNeg.length + "\t" + getPosNegRatio());
+    $('#statustext').text(formatStatus(liveTweetsNeg.length, getPosNegRatio()));
 }
 
 function getPosNegRatio()
@@ -189,6 +193,6 @@ function getPosNegRatio()
     else {
         var ratio = liveTweetsPos.length/liveTweetsNeg.length;
         var str = parseFloat(Math.round(ratio * 10) / 10).toFixed(1);
-        return "Positive/Negative Ratio: " + str;
+        return "P/N: " + str;
     }
 }

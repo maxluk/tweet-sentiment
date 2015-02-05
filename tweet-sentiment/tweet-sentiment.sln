@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30501.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleStreamingService", "SimpleStreamingService\SimpleStreamingService.csproj", "{CAD2E0AE-E099-40B6-9C8B-09C497714E56}"
 EndProject
@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Configurations", "Configura
 		PublishScripts\Configurations\WebApp-WAWS-dev.json = PublishScripts\Configurations\WebApp-WAWS-dev.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StormTopology", "StormTopology\StormTopology.csproj", "{07A5C65F-90C3-4E87-AFAC-B6BE47866428}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{69FC8AC4-5330-4003-9463-3C6FC7739D69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69FC8AC4-5330-4003-9463-3C6FC7739D69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{69FC8AC4-5330-4003-9463-3C6FC7739D69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07A5C65F-90C3-4E87-AFAC-B6BE47866428}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07A5C65F-90C3-4E87-AFAC-B6BE47866428}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07A5C65F-90C3-4E87-AFAC-B6BE47866428}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07A5C65F-90C3-4E87-AFAC-B6BE47866428}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

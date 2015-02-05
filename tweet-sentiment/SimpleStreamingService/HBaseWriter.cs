@@ -16,7 +16,11 @@ namespace SimpleStreamingService
     {
         HBaseClient client;
         //string tableByIdName = "tweets_by_id";
-        string tableByWordsName = "tweets_by_words";
+        const string TABLE_BY_WORDS_NAME = "tweets_by_words";
+        const string COUNT_ROW_KEY = "~ROWCOUNT";
+        const string COUNT_COLUMN_NAME = "d:COUNT";
+
+        long rowCount = 0;
 
         Dictionary<string, DictionaryItem> dictionary;
 
@@ -29,15 +33,18 @@ namespace SimpleStreamingService
             var credentials = CreateFromFile(@"..\..\credentials.txt");
             client = new HBaseClient(credentials);
 
-            if (!client.ListTables().name.Contains(tableByWordsName))
+            if (!client.ListTables().name.Contains(TABLE_BY_WORDS_NAME))
             {
                 // Create the table
                 var tableSchema = new TableSchema();
-                tableSchema.name = tableByWordsName;
+                tableSchema.name = TABLE_BY_WORDS_NAME;
                 tableSchema.columns.Add(new ColumnSchema { name = "d" });
                 client.CreateTable(tableSchema);
-                Console.WriteLine("Table \"{0}\" created.", tableByWordsName);
+                Console.WriteLine("Table \"{0}\" created.", TABLE_BY_WORDS_NAME);
             }
+
+            // Read current row count cell
+            rowCount = GetRowCount();
 
             // Load sentiment dictionary file
             LoadDictionary();
@@ -46,9 +53,45 @@ namespace SimpleStreamingService
             writerThread.Start();
         }
 
+
         ~HBaseWriter ()
         {
             threadRunning = false;
+        }
+
+        private long GetRowCount()
+        {
+            try
+            {
+                var cellSet = client.GetCells(TABLE_BY_WORDS_NAME, COUNT_ROW_KEY);
+                if (cellSet.rows.Count != 0)
+                {
+                    var countCol = cellSet.rows[0].values.Find(cell => Encoding.UTF8.GetString(cell.column) == COUNT_COLUMN_NAME);
+                    if (countCol != null)
+                    {
+                        return Convert.ToInt64(Encoding.UTF8.GetString(countCol.data));
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                return 0;
+            }
+
+            return 0;
+        }
+
+        private void CreateRowCountCell(CellSet set, long count)
+        {
+            var row = new CellSet.Row { key = Encoding.UTF8.GetBytes(COUNT_ROW_KEY) };
+
+            var value = new Cell
+            {
+                column = Encoding.UTF8.GetBytes(COUNT_COLUMN_NAME),
+                data = Encoding.UTF8.GetBytes(count.ToString())
+            };
+            row.values.Add(value);
+            set.rows.Add(row);
         }
 
         public void WriteTweet(Tweetinvi.Core.Interfaces.ITweet tweet)
@@ -61,9 +104,9 @@ namespace SimpleStreamingService
 
         public void WriterThreadFunction()
         {
-            try
+            while(threadRunning)
             {
-                while(threadRunning)
+                try
                 {
                     if (queue.Count > 0)
                     {
@@ -75,17 +118,24 @@ namespace SimpleStreamingService
                                 var tweet = queue.Dequeue();
 
                                 CreateTweetByWordsCells(set, tweet);
+
                             } while (queue.Count > 0);
                         }
-                        client.StoreCells(tableByWordsName, set);
+
+                        // Update count of rows as part of the same batch
+                        CreateRowCountCell(set, rowCount + set.rows.Count);
+
+                        client.StoreCells(TABLE_BY_WORDS_NAME, set);
+                        rowCount += set.rows.Count;
+
                         Console.WriteLine("===== {0} rows written =====", set.rows.Count);
                     }
                     Thread.Sleep(100);
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception: " + ex.Message);
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception: " + ex.Message + "\nStackTrace: \n" + ex.StackTrace);
+                }
             }
         }
 
