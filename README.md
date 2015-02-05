@@ -1,6 +1,6 @@
 Realtime social sentiment analysis app
 ======
-This app connects to the real-time stream of geo tagged tweets, performs sentiment analysis on them, stores tweets in HBase and visualizes positive/negative tweets that match particular keyword as a heatmap. See the running app here: http://tweetsentiment.azurewebsites.net/ (works in IE11-only at the moment).
+This app connects to the real-time stream of geo tagged tweets, performs sentiment analysis on them, stores tweets in HBase and visualizes positive/negative tweets that match particular keyword as a heatmap. See the running app here: http://tweetsentiment.azurewebsites.net/.
 
 Building
 ======
