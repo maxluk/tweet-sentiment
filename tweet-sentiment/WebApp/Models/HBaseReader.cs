@@ -62,8 +62,8 @@ namespace WebApp.Models
                         }
 
                         list.Add(new Tweet {
-                            Longtitude = Convert.ToDouble(lonlat[0]),
-                            Latitude = Convert.ToDouble(lonlat[1]),
+                            Longtitude = Convert.ToDouble(string.Format("{0},{1}", lonlat[0], lonlat[1])),
+                            Latitude = Convert.ToDouble(string.Format("{0},{1}", lonlat[2], lonlat[3])),
                             Sentiment = sentiment
                         });
                     }
