@@ -25,13 +25,13 @@ namespace TweetSentimentTopology
             var credentials = CreateFromFile(@"credentials.txt");
             client = new HBaseClient(credentials);
 
-            if (!client.ListTables().name.Contains(TABLE_BY_WORDS_NAME))
+            if (!client.ListTablesAsync().Result.name.Contains(TABLE_BY_WORDS_NAME))
             {
                 // Create the table
                 var tableSchema = new TableSchema();
                 tableSchema.name = TABLE_BY_WORDS_NAME;
                 tableSchema.columns.Add(new ColumnSchema { name = "d" });
-                client.CreateTable(tableSchema);
+                client.CreateTableAsync(tableSchema).Wait();
             }
         }
 
@@ -44,14 +44,14 @@ namespace TweetSentimentTopology
                 CreateTweetByWordsCells(set, item);
             }
 
-            client.StoreCells(TABLE_BY_WORDS_NAME, set);
+            client.StoreCellsAsync(TABLE_BY_WORDS_NAME, set).Wait();
         }
 
         public long GetRowCount()
         {
             try
             {
-                var cellSet = client.GetCells(TABLE_BY_WORDS_NAME, COUNT_ROW_KEY);
+                var cellSet = client.GetCellsAsync(TABLE_BY_WORDS_NAME, COUNT_ROW_KEY).Result;
                 if (cellSet.rows.Count != 0)
                 {
                     var countCol = cellSet.rows[0].values.Find(cell => Encoding.UTF8.GetString(cell.column) == COUNT_COLUMN_NAME);
@@ -74,7 +74,7 @@ namespace TweetSentimentTopology
             var set = new CellSet();
             CreateRowCountCell(set, rowCount);
 
-            client.StoreCells(TABLE_BY_WORDS_NAME, set);
+            client.StoreCellsAsync(TABLE_BY_WORDS_NAME, set).Wait();
         }
 
         private void CreateRowCountCell(CellSet set, long count)
