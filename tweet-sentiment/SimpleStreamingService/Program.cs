@@ -6,9 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Tweetinvi;
-using Tweetinvi.Core.Enum;
-using Tweetinvi.Core.Interfaces.Models;
-using Tweetinvi.Core.Interfaces.Models.Parameters;
+using Tweetinvi.Models;
 
 namespace SimpleStreamingService
 {
@@ -16,61 +14,12 @@ namespace SimpleStreamingService
     {
         static void Main(string[] args)
         {
-            TwitterCredentials.SetCredentials(
+            Auth.SetUserCredentials(ConfigurationManager.AppSettings["token_ConsumerKey"], 
+                ConfigurationManager.AppSettings["token_ConsumerSecret"],
                 ConfigurationManager.AppSettings["token_AccessToken"],
-                ConfigurationManager.AppSettings["token_AccessTokenSecret"],
-                ConfigurationManager.AppSettings["token_ConsumerKey"],
-                ConfigurationManager.AppSettings["token_ConsumerSecret"]);
+                ConfigurationManager.AppSettings["token_AccessTokenSecret"]);
 
-            //Search_FilteredSearch();
             Stream_FilteredStreamExample();
-            //Stream_SampleStreamExample();
-        }
-
-        private static void Stream_SampleStreamExample()
-        {
-            var hbase = new HBaseWriter();
-
-            for(;;)
-            {
-                try
-                {
-                    var stream = Stream.CreateSampleStream();
-                    stream.FilterTweetsToBeIn(Language.English);
-
-                    stream.TweetReceived += (sender, args) =>
-                    {
-                        var tweet = args.Tweet;
-                        hbase.WriteTweet(tweet);
-                        if (tweet.Coordinates != null)
-                        {
-                            Console.WriteLine("{0}: {1}", tweet.Id, tweet.Text);
-                            Console.WriteLine("\tLocation: {0}, {1}", tweet.Coordinates.Longitude, tweet.Coordinates.Latitude);
-                        }
-                        else
-                        {
-                            //Console.WriteLine("\tLocation: null");
-                        }
-                        if (tweet.Place != null)
-                        {
-                            Console.WriteLine("\tPlace: {0}", tweet.Place.FullName);
-                        }
-
-                        /*IEnumerable<ILocation> matchingLocations = args.Tweet.;
-                        foreach (var matchingLocation in matchingLocations)
-                        {
-                            Console.Write("({0}, {1}) ;", matchingLocation.Coordinate1.Latitude, matchingLocation.Coordinate1.Longitude);
-                            Console.WriteLine("({0}, {1})", matchingLocation.Coordinate2.Latitude, matchingLocation.Coordinate2.Longitude);
-                        }*/
-                    };
-
-                    //stream.StartStreamMatchingAllConditions();
-                    stream.StartStream();
-                }
-                catch(Exception ex)
-                {
-                }
-            }
         }
 
         private static void Stream_FilteredStreamExample()
@@ -79,10 +28,9 @@ namespace SimpleStreamingService
             {
                 try
                 {
-                    var hbase = new HBaseWriter(); 
+                    HBaseWriter hbase = new HBaseWriter(); 
                     var stream = Stream.CreateFilteredStream();
-                    var location = Geo.GenerateLocation(-180, -90, 180, 90);
-                    stream.AddLocation(location);
+                    stream.AddLocation(new Coordinates(90, -180), new Coordinates(-90, 180));
 
                     var tweetCount = 0;
                     var timer = Stopwatch.StartNew();
@@ -97,7 +45,9 @@ namespace SimpleStreamingService
                         {
                             if (tweet.Coordinates != null)
                             {
+                                Console.ForegroundColor = ConsoleColor.Green;
                                 Console.WriteLine("{0}: {1} {2}", tweet.Id, tweet.Language.ToString(), tweet.Text);
+                                Console.ForegroundColor = ConsoleColor.White;
                                 Console.WriteLine("\tLocation: {0}, {1}", tweet.Coordinates.Longitude, tweet.Coordinates.Latitude);
                             }
 
@@ -105,13 +55,6 @@ namespace SimpleStreamingService
                             Console.WriteLine("===== Tweets/sec: {0} =====", tweetCount);
                             tweetCount = 0;
                         }
-
-                        /*IEnumerable<ILocation> matchingLocations = args.Tweet.;
-                        foreach (var matchingLocation in matchingLocations)
-                        {
-                            Console.Write("({0}, {1}) ;", matchingLocation.Coordinate1.Latitude, matchingLocation.Coordinate1.Longitude);
-                            Console.WriteLine("({0}, {1})", matchingLocation.Coordinate2.Latitude, matchingLocation.Coordinate2.Longitude);
-                        }*/
                     };
 
                     stream.StartStreamMatchingAllConditions();
@@ -121,16 +64,6 @@ namespace SimpleStreamingService
                     Console.WriteLine("Exception: {0}", ex.Message);
                 }
             }
-        }
-
-        private static void Search_FilteredSearch()
-        {
-            var searchParameter = Search.GenerateSearchTweetParameter("airlines");
-            searchParameter.TweetSearchFilter = TweetSearchFilter.All;
-            searchParameter.Since = DateTime.Now.Subtract(new TimeSpan(1, 0, 0));
-
-            var tweets = Search.SearchTweets(searchParameter);
-            tweets.ForEach(t => Console.WriteLine(t.Text));
         }
     }
 }
