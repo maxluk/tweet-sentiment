@@ -8,7 +8,8 @@ using org.apache.hadoop.hbase.rest.protobuf.generated;
 using System.IO;
 using System.Globalization;
 using System.Threading;
-using Tweetinvi.Core.Interfaces;
+using Tweetinvi.Models;
+using Microsoft.Practices.EnterpriseLibrary.TransientFaultHandling;
 
 namespace SimpleStreamingService
 {
@@ -63,7 +64,11 @@ namespace SimpleStreamingService
         {
             try
             {
-                var cellSet = client.GetCellsAsync(TABLE_BY_WORDS_NAME, COUNT_ROW_KEY).Result;
+                // Overwrite default retry policy (Exponential) to NoRetry.
+                // 404 NOT FOUND is falsely treated as exception and will be stuck here
+                RequestOptions options = RequestOptions.GetDefaultOptions();
+                options.RetryPolicy = RetryPolicy.NoRetry;
+                var cellSet = client.GetCellsAsync(TABLE_BY_WORDS_NAME, COUNT_ROW_KEY, null, null, options).Result;
                 if (cellSet.rows.Count != 0)
                 {
                     var countCol = cellSet.rows[0].values.Find(cell => Encoding.UTF8.GetString(cell.column) == COUNT_COLUMN_NAME);
@@ -75,7 +80,15 @@ namespace SimpleStreamingService
             }
             catch(Exception ex)
             {
-                return 0;
+                if (ex.InnerException.Message.Equals("The remote server returned an error: (404) Not Found.", StringComparison.OrdinalIgnoreCase))
+                {
+                    return 0;
+                }
+                else
+                {
+                    throw ex;
+                }
+                
             }
 
             return 0;
@@ -94,7 +107,7 @@ namespace SimpleStreamingService
             set.rows.Add(row);
         }
 
-        public void WriteTweet(Tweetinvi.Core.Interfaces.ITweet tweet)
+        public void WriteTweet(ITweet tweet)
         {
             lock(queue)
             {
